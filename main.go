@@ -35,6 +35,11 @@ func main() {
 		currentUser: "",
 	}
 
+	username := programState.cfg.GetUser()
+	if username != "" {
+		programState.currentUser = username
+	}
+
 	cmds := commands{
 		registeredCommands: make(map[string]func(*state, command) error),
 	}
@@ -43,6 +48,8 @@ func main() {
 	cmds.register("reset", resetCommandHandler)
 	cmds.register("users", usersCommand)
 	cmds.register("agg", aggCommand)
+	cmds.register("addfeed", handlerAddFeed)
+	cmds.register("feeds", handlerFeeds)
 
 	if len(os.Args) < 2 {
 		log.Fatal("Usage: cli <command> [args...]")

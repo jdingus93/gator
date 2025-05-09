@@ -1,4 +1,4 @@
--- Schema defginition
+-- Schema definition
 CREATE TABLE users (
     id UUID PRIMARY KEY,
     created_at TIMESTAMP NOT NULL,
@@ -24,3 +24,13 @@ delete from users;
 
 -- name: GetUsers :many
 select * from users;
+
+-- name: GetUserByName :one
+SELECT * FROM users
+WHERE name = $1
+LIMIT 1;
+
+-- name: GetUserByID :one
+SELECT id, created_at, updated_at, name 
+FROM users 
+WHERE id = $1;
