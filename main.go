@@ -1,78 +1,58 @@
 package main
 
 import (
-	"fmt"
+	"database/sql"
 	"log"
 	"os"
+
 	"github.com/jdingus93/gator/internal/config"
+	"github.com/jdingus93/gator/internal/database"
+	_ "github.com/lib/pq"
 )
+
+type state struct {
+	db  *database.Queries
+	cfg *config.Config
+	currentUser string
+}
 
 func main() {
 	cfg, err := config.Read()
-	if err !=  nil {
-		log.Fatal(err)
-	}
-	
-	cmds := &commands{
-		handlers: make(map[string]func(*state, command) error),
+	if err != nil {
+		log.Fatalf("error reading config: %v", err)
 	}
 
-	s := &state{config: cfg}
+	db, err := sql.Open("postgres", cfg.DBURL)
+	if err != nil {
+		log.Fatalf("error connecting to db: %v", err)
+	}
+	defer db.Close()
+	dbQueries := database.New(db)
 
+	programState := &state{
+		db:  dbQueries,
+		cfg: &cfg,
+		currentUser: "",
+	}
+
+	cmds := commands{
+		registeredCommands: make(map[string]func(*state, command) error),
+	}
 	cmds.register("login", handlerLogin)
+	cmds.register("register", handlerRegister)
+	cmds.register("reset", resetCommandHandler)
+	cmds.register("users", usersCommand)
 
 	if len(os.Args) < 2 {
-		fmt.Println("Error: not enough arguments provided")
-		os.Exit(1)
+		log.Fatal("Usage: cli <command> [args...]")
+		return
 	}
 
-	cmd := command{
-		name: os.Args[1],
-		args: os.Args[2:],
-	}
+	cmdName := os.Args[1]
+	cmdArgs := os.Args[2:]
 
-	err = cmds.run(s, cmd)
+	err = cmds.run(programState, command{Name: cmdName, Args: cmdArgs})
 	if err != nil {
-		fmt.Println("Error:", err)
-		os.Exit(1)
+		log.Fatal(err)
 	}
-}
-
-type state struct {
-	config config.Config
-}
-
-type command struct {
-	name string
-	args []string
-}
-
-func handlerLogin(s *state, cmd command) error {
-	if len(cmd.args) == 0 {
-		return fmt.Errorf("username required")
-	}
-	err := s.config.SetUser(cmd.args[0])
-	if err != nil {
-		return err
-	}
-
-	fmt.Printf("User set to: %s\n", cmd.args[0])
-	return nil
-}
-
-type commands struct {
-	handlers map[string]func(*state, command) error
-}
-
-func (c* commands) run(s *state, cmd command) error {
-	handler, exists := c.handlers[cmd.name]
-	if !exists {
-		return fmt.Errorf("unkown command: %s", cmd.name)
-	}
-	return handler(s, cmd)
-}
-
-
-func (c* commands) register(name string, f func(*state, command) error) {
-	c.handlers[name] = f
 }

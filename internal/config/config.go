@@ -13,12 +13,12 @@ type Config struct {
 	CurrentUserName string `json:"current_user_name"`
 }
 
-func (cfg Config) Save() any {
-	panic("unimplemented")
+func (cfg Config) GetUser() string {
+	return cfg.CurrentUserName
 }
 
-func (cfg *Config) SetUser(newUser string) error {
-	cfg.CurrentUserName = newUser
+func (cfg *Config) SetUser(userName string) error {
+	cfg.CurrentUserName = userName
 	return write(*cfg)
 }
 
@@ -27,6 +27,7 @@ func Read() (Config, error) {
 	if err != nil {
 		return Config{}, err
 	}
+
 	file, err := os.Open(fullPath)
 	if err != nil {
 		return Config{}, err
@@ -39,6 +40,7 @@ func Read() (Config, error) {
 	if err != nil {
 		return Config{}, err
 	}
+
 	return cfg, nil
 }
 
@@ -56,6 +58,7 @@ func write(cfg Config) error {
 	if err != nil {
 		return err
 	}
+
 	file, err := os.Create(fullPath)
 	if err != nil {
 		return err
