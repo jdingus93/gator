@@ -4,6 +4,7 @@ import (
 	"context"
 	"errors"
 	"fmt"
+	"github.com/jdingus93/gator/internal/feed"
 )
 
 type command struct {
@@ -55,5 +56,18 @@ func usersCommand(s *state, cmd command) error {
 			fmt.Printf("* %s\n", u.Name)
 		}
 	}
+	return nil
+}
+
+func aggCommand(s *state, comd command) error {
+	ctx := context.Background()
+
+	feed, err := feed.FetchFeed(ctx, "https://www.wagslane.dev/index.xml")
+	if err != nil {
+		return err
+	}
+
+	fmt.Printf("%+v\n", feed)
+
 	return nil
 }
