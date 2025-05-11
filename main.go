@@ -13,7 +13,6 @@ import (
 type state struct {
 	db  *database.Queries
 	cfg *config.Config
-	currentUser string
 }
 
 func main() {
@@ -32,24 +31,20 @@ func main() {
 	programState := &state{
 		db:  dbQueries,
 		cfg: &cfg,
-		currentUser: "",
-	}
-
-	username := programState.cfg.GetUser()
-	if username != "" {
-		programState.currentUser = username
 	}
 
 	cmds := commands{
 		registeredCommands: make(map[string]func(*state, command) error),
 	}
-	cmds.register("login", handlerLogin)
 	cmds.register("register", handlerRegister)
-	cmds.register("reset", resetCommandHandler)
-	cmds.register("users", usersCommand)
-	cmds.register("agg", aggCommand)
+	cmds.register("login", handlerLogin)
+	cmds.register("reset", handlerReset)
+	cmds.register("users", handlerListUsers)
+	cmds.register("agg", handlerAgg)
 	cmds.register("addfeed", handlerAddFeed)
-	cmds.register("feeds", handlerFeeds)
+	cmds.register("feeds", handlerListFeeds)
+	cmds.register("follow", handlerFollow)
+	cmds.register("following", handlerListFeedFollows)
 
 	if len(os.Args) < 2 {
 		log.Fatal("Usage: cli <command> [args...]")

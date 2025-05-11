@@ -1,11 +1,3 @@
--- Schema definition
-CREATE TABLE users (
-    id UUID PRIMARY KEY,
-    created_at TIMESTAMP NOT NULL,
-    updated_at TIMESTAMP NOT NULL,
-    name TEXT UNIQUE NOT NULL
-);
-
 -- name: CreateUser :one
 INSERT INTO users (id, created_at, updated_at, name)
 VALUES (
@@ -17,20 +9,13 @@ VALUES (
 RETURNING *;
 
 -- name: GetUser :one
-select * from users where name = $1;
+SELECT * FROM users WHERE name = $1;
 
--- name: DeleteAllUsers :exec
-delete from users;
+-- name: DeleteUsers :exec
+DELETE FROM users;
 
 -- name: GetUsers :many
-select * from users;
+SELECT * FROM users;
 
--- name: GetUserByName :one
-SELECT * FROM users
-WHERE name = $1
-LIMIT 1;
-
--- name: GetUserByID :one
-SELECT id, created_at, updated_at, name 
-FROM users 
-WHERE id = $1;
+-- name: GetUserById :one
+SELECT * FROM users WHERE id = $1;
