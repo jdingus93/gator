@@ -25,6 +25,13 @@ type RSSItem struct {
 	PubDate     string `xml:"pubDate"`
 }
 
+type Item struct {
+	Title 		string `xml:"title"`
+	Link 		string `xml:"link"`
+	Description string `xml:"description"`
+	PubDate 	string `xml:"pubDate"`
+}
+
 func fetchFeed(ctx context.Context, feedURL string) (*RSSFeed, error) {
 	httpClient := http.Client{
 		Timeout: 10 * time.Second,
